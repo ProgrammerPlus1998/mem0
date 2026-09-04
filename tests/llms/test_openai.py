@@ -6,10 +6,7 @@ import pytest
 # OpenAILLM (via the http_client_proxies plumbing) now prefers httpx2 when
 # present. Mirror that import so the isinstance assertion at line 466 matches
 # the class produced by mem0.utils.http.build_http_client.
-try:
-    import httpx2 as httpx
-except ModuleNotFoundError:
-    import httpx
+import httpx2
 
 from mem0.configs.llms.base import BaseLlmConfig
 from mem0.configs.llms.openai import OpenAIConfig
@@ -470,4 +467,4 @@ def test_openai_llm_preserves_proxies_from_base_config(mock_openai_client):
     )
     llm = OpenAILLM(config)
     assert llm.config.http_client_proxies == "http://proxy.local:8080"
-    assert isinstance(llm.config.http_client, httpx.Client)
+    assert isinstance(llm.config.http_client, httpx2.Client)

@@ -2,10 +2,7 @@ import logging
 import threading
 from typing import List, Optional, Union
 
-try:
-    import httpx2 as httpx
-except ModuleNotFoundError:
-    import httpx
+import httpx2
 
 import mem0
 
@@ -59,7 +56,7 @@ class Completions:
         filters: Optional[dict] = None,
         top_k: Optional[int] = 10,
         # LLM arguments
-        timeout: Optional[Union[float, str, httpx.Timeout]] = None,
+        timeout: Optional[Union[float, str, httpx2.Timeout]] = None,
         temperature: Optional[float] = None,
         top_p: Optional[float] = None,
         n: Optional[int] = None,

@@ -3,10 +3,7 @@ import json
 import logging
 from functools import wraps
 
-try:
-    import httpx2 as httpx
-except ModuleNotFoundError:
-    import httpx
+import httpx2
 
 from mem0.exceptions import (
     NetworkError,
@@ -71,14 +68,14 @@ def _handle_http_error(e):
 def _handle_request_error(e):
     logger.error(f"Request error occurred: {e}")
 
-    if isinstance(e, httpx.TimeoutException):
+    if isinstance(e, httpx2.TimeoutException):
         raise NetworkError(
             message=f"Request timed out: {str(e)}",
             error_code="NET_TIMEOUT",
             suggestion="Please check your internet connection and try again",
             debug_info={"error_type": "timeout", "original_error": str(e)},
         )
-    elif isinstance(e, httpx.ConnectError):
+    elif isinstance(e, httpx2.ConnectError):
         raise NetworkError(
             message=f"Connection failed: {str(e)}",
             error_code="NET_CONNECT",
@@ -107,10 +104,10 @@ def api_error_handler(func):
         async def async_wrapper(*args, **kwargs):
             try:
                 return await func(*args, **kwargs)
-            except httpx.HTTPStatusError as e:
+            except httpx2.HTTPStatusError as e:
                 _handle_http_error(e)
                 raise
-            except httpx.RequestError as e:
+            except httpx2.RequestError as e:
                 _handle_request_error(e)
                 raise
 
@@ -120,10 +117,10 @@ def api_error_handler(func):
         def wrapper(*args, **kwargs):
             try:
                 return func(*args, **kwargs)
-            except httpx.HTTPStatusError as e:
+            except httpx2.HTTPStatusError as e:
                 _handle_http_error(e)
                 raise
-            except httpx.RequestError as e:
+            except httpx2.RequestError as e:
                 _handle_request_error(e)
                 raise
 

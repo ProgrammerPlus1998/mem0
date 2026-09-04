@@ -2,10 +2,7 @@ import pytest
 
 # mem0.utils.http (and the configs that call it) now produce httpx2.Client
 # objects. Mirror that here so the isinstance checks below match reality.
-try:
-    import httpx2 as httpx
-except ModuleNotFoundError:
-    import httpx
+import httpx2
 
 from mem0.configs.embeddings.base import BaseEmbedderConfig
 from mem0.configs.llms.base import BaseLlmConfig
@@ -15,7 +12,7 @@ from mem0.utils.factory import LlmFactory
 @pytest.mark.parametrize("config_cls", [BaseLlmConfig, BaseEmbedderConfig])
 def test_config_with_string_proxy_builds_client(config_cls):
     config = config_cls(http_client_proxies="http://proxy.local:8080")
-    assert isinstance(config.http_client, httpx.Client)
+    assert isinstance(config.http_client, httpx2.Client)
     assert config.http_client_proxies == "http://proxy.local:8080"
 
 
@@ -23,7 +20,7 @@ def test_config_with_string_proxy_builds_client(config_cls):
 def test_config_with_dict_proxy_builds_client(config_cls):
     proxies = {"http://": "http://p:8080", "https://": "http://p:8080"}
     config = config_cls(http_client_proxies=proxies)
-    assert isinstance(config.http_client, httpx.Client)
+    assert isinstance(config.http_client, httpx2.Client)
     assert config.http_client_proxies == proxies
 
 
@@ -42,4 +39,4 @@ def test_llm_factory_preserves_http_client_proxies():
     )
     llm = LlmFactory.create("openai", base)
     assert llm.config.http_client_proxies == "http://proxy.local:8080"
-    assert isinstance(llm.config.http_client, httpx.Client)
+    assert isinstance(llm.config.http_client, httpx2.Client)

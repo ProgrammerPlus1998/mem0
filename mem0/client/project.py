@@ -2,10 +2,7 @@ import logging
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional
 
-try:
-    import httpx2 as httpx
-except ModuleNotFoundError:
-    import httpx
+import httpx2
 from pydantic import BaseModel, ConfigDict, Field
 
 from mem0.client.utils import api_error_handler
@@ -306,7 +303,7 @@ class Project(BaseProject):
 
     def __init__(
         self,
-        client: httpx.Client,
+        client: httpx2.Client,
         config: Optional[ProjectConfig] = None,
         org_id: Optional[str] = None,
         project_id: Optional[str] = None,
@@ -630,7 +627,7 @@ class AsyncProject(BaseProject):
 
     def __init__(
         self,
-        client: httpx.AsyncClient,
+        client: httpx2.AsyncClient,
         config: Optional[ProjectConfig] = None,
         org_id: Optional[str] = None,
         project_id: Optional[str] = None,

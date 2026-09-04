@@ -5,10 +5,7 @@ import pytest
 # mem0.client.utils prefers httpx2 when present; mirror that here so the
 # exception classes (HTTPStatusError, ConnectError, RequestError, TimeoutException)
 # used as side_effect in the fixtures match what the SUT catches.
-try:
-    import httpx2 as httpx
-except ModuleNotFoundError:
-    import httpx
+import httpx2
 
 from mem0.client.utils import api_error_handler
 from mem0.exceptions import AuthenticationError, NetworkError, RateLimitError
@@ -50,9 +47,9 @@ def test_sync_decorated_is_not_coroutine():
 def test_sync_http_error_raises_structured_exception():
     @api_error_handler
     def sync_fn():
-        request = httpx.Request("GET", "https://api.mem0.ai/v1/memories")
-        response = httpx.Response(401, request=request, text="Unauthorized")
-        raise httpx.HTTPStatusError("401", request=request, response=response)
+        request = httpx2.Request("GET", "https://api.mem0.ai/v1/memories")
+        response = httpx2.Response(401, request=request, text="Unauthorized")
+        raise httpx2.HTTPStatusError("401", request=request, response=response)
 
     with pytest.raises(AuthenticationError):
         sync_fn()
@@ -62,9 +59,9 @@ def test_sync_http_error_raises_structured_exception():
 async def test_async_http_error_raises_structured_exception():
     @api_error_handler
     async def async_fn():
-        request = httpx.Request("GET", "https://api.mem0.ai/v1/memories")
-        response = httpx.Response(429, request=request, text="Rate limited")
-        raise httpx.HTTPStatusError("429", request=request, response=response)
+        request = httpx2.Request("GET", "https://api.mem0.ai/v1/memories")
+        response = httpx2.Response(429, request=request, text="Rate limited")
+        raise httpx2.HTTPStatusError("429", request=request, response=response)
 
     with pytest.raises(RateLimitError):
         await async_fn()
@@ -74,8 +71,8 @@ async def test_async_http_error_raises_structured_exception():
 async def test_async_connect_error_raises_network_error():
     @api_error_handler
     async def async_fn():
-        request = httpx.Request("GET", "https://api.mem0.ai/v1/memories")
-        raise httpx.ConnectError("Connection refused", request=request)
+        request = httpx2.Request("GET", "https://api.mem0.ai/v1/memories")
+        raise httpx2.ConnectError("Connection refused", request=request)
 
     with pytest.raises(NetworkError) as exc_info:
         await async_fn()

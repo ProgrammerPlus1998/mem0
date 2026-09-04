@@ -5,10 +5,7 @@ import warnings
 from typing import Any, Dict, List, Optional
 from urllib.parse import quote
 
-try:
-    import httpx2 as httpx
-except ModuleNotFoundError:
-    import httpx
+import httpx2
 import requests
 
 from mem0.client.project import AsyncProject, Project
@@ -91,7 +88,7 @@ class MemoryClient:
     Attributes:
         api_key (str): The API key for authenticating with the Mem0 API.
         host (str): The base URL for the Mem0 API.
-        client (httpx.Client): The HTTP client used for making API requests.
+        client (httpx2.Client): The HTTP client used for making API requests.
         user_id (str): Unique identifier for the user.
     """
 
@@ -99,7 +96,7 @@ class MemoryClient:
         self,
         api_key: Optional[str] = None,
         host: Optional[str] = None,
-        client: Optional[httpx.Client] = None,
+        client: Optional[httpx2.Client] = None,
     ):
         """Initialize the MemoryClient.
 
@@ -109,7 +106,7 @@ class MemoryClient:
                      environment variable.
             host: The base URL for the Mem0 API. Defaults to
                   "https://api.mem0.ai".
-            client: A custom httpx.Client instance. If provided, it will be
+            client: A custom httpx2.Client instance. If provided, it will be
                     used instead of creating a new one. Note that base_url and
                     headers will be set/overridden as needed.
 
@@ -131,7 +128,7 @@ class MemoryClient:
         if client is not None:
             self.client = client
             # Ensure the client has the correct base_url and headers
-            self.client.base_url = httpx.URL(self.host)
+            self.client.base_url = httpx2.URL(self.host)
             self.client.headers.update(
                 {
                     "Authorization": f"Token {self.api_key}",
@@ -139,7 +136,7 @@ class MemoryClient:
                 }
             )
         else:
-            self.client = httpx.Client(
+            self.client = httpx2.Client(
                 base_url=self.host,
                 headers={
                     "Authorization": f"Token {self.api_key}",
@@ -175,7 +172,7 @@ class MemoryClient:
 
             return data.get("user_email")
 
-        except httpx.HTTPStatusError as e:
+        except httpx2.HTTPStatusError as e:
             try:
                 error_data = e.response.json()
                 error_message = error_data.get("detail", str(e))
@@ -981,14 +978,14 @@ class AsyncMemoryClient:
     """Asynchronous client for interacting with the Mem0 API.
 
     This class provides asynchronous versions of all MemoryClient methods.
-    It uses httpx.AsyncClient for making non-blocking API requests.
+    It uses httpx2.AsyncClient for making non-blocking API requests.
     """
 
     def __init__(
         self,
         api_key: Optional[str] = None,
         host: Optional[str] = None,
-        client: Optional[httpx.AsyncClient] = None,
+        client: Optional[httpx2.AsyncClient] = None,
     ):
         """Initialize the AsyncMemoryClient.
 
@@ -998,7 +995,7 @@ class AsyncMemoryClient:
                      environment variable.
             host: The base URL for the Mem0 API. Defaults to
                   "https://api.mem0.ai".
-            client: A custom httpx.AsyncClient instance. If provided, it will
+            client: A custom httpx2.AsyncClient instance. If provided, it will
                     be used instead of creating a new one. Note that base_url
                     and headers will be set/overridden as needed.
 
@@ -1020,7 +1017,7 @@ class AsyncMemoryClient:
         if client is not None:
             self.async_client = client
             # Ensure the client has the correct base_url and headers
-            self.async_client.base_url = httpx.URL(self.host)
+            self.async_client.base_url = httpx2.URL(self.host)
             self.async_client.headers.update(
                 {
                     "Authorization": f"Token {self.api_key}",
@@ -1028,7 +1025,7 @@ class AsyncMemoryClient:
                 }
             )
         else:
-            self.async_client = httpx.AsyncClient(
+            self.async_client = httpx2.AsyncClient(
                 base_url=self.host,
                 headers={
                     "Authorization": f"Token {self.api_key}",

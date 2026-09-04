@@ -10,10 +10,7 @@ import requests
 # Use the same dual-import strategy as the production client. mem0.client.main
 # prefers httpx2 when present; tests that exercise that module must use the
 # same module so isinstance / raise_for_status / exception matching line up.
-try:
-    import httpx2 as httpx
-except ModuleNotFoundError:
-    import httpx
+import httpx2
 
 from mem0.client.main import AsyncMemoryClient
 from mem0.client.types import GetAllMemoryOptions, SearchMemoryOptions
@@ -22,7 +19,7 @@ from mem0.client.types import GetAllMemoryOptions, SearchMemoryOptions
 @pytest.fixture
 def mock_memory_client():
     """Create a mock MemoryClient for testing entity param rejection."""
-    with patch("mem0.client.main.httpx.Client") as mock_httpx:
+    with patch("mem0.client.main.httpx2.Client") as mock_httpx:
         # Create a mock client instance
         mock_http_client = MagicMock()
         mock_http_client.get.return_value = MagicMock(
@@ -551,15 +548,15 @@ class TestValidateApiKeyHttpError:
 
     def test_sync_client_non_json_5xx_raises_clear_error(self):
         # HTML body from a CDN/proxy: json() fails, but raise_for_status() reports the 503.
-        request = httpx.Request("GET", "https://api.mem0.ai/v1/ping/")
-        error_response = httpx.Response(503, text="<html>503 Service Unavailable</html>", request=request)
+        request = httpx2.Request("GET", "https://api.mem0.ai/v1/ping/")
+        error_response = httpx2.Response(503, text="<html>503 Service Unavailable</html>", request=request)
         response = MagicMock()
         response.json.side_effect = json.JSONDecodeError("Expecting value", "<html>", 0)
-        response.raise_for_status.side_effect = httpx.HTTPStatusError(
+        response.raise_for_status.side_effect = httpx2.HTTPStatusError(
             "Server error", request=request, response=error_response
         )
 
-        with patch("mem0.client.main.httpx.Client") as mock_httpx:
+        with patch("mem0.client.main.httpx2.Client") as mock_httpx:
             mock_http_client = MagicMock()
             mock_http_client.get.return_value = response
             mock_httpx.return_value = mock_http_client
@@ -576,8 +573,8 @@ class TestValidateApiKeyHttpError:
         assert "Error:" in str(exc_info.value)
 
     def test_async_client_non_json_5xx_raises_clear_error(self):
-        request = httpx.Request("GET", "https://api.mem0.ai/v1/ping/")
-        error_response = httpx.Response(503, text="<html>503 Service Unavailable</html>", request=request)
+        request = httpx2.Request("GET", "https://api.mem0.ai/v1/ping/")
+        error_response = httpx2.Response(503, text="<html>503 Service Unavailable</html>", request=request)
         response = MagicMock()
         response.json.side_effect = requests.exceptions.JSONDecodeError("Expecting value", "<html>", 0)
         http_error = requests.exceptions.HTTPError("Server error", response=error_response)
